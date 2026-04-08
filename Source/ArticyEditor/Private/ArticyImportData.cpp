@@ -935,7 +935,11 @@ void UArticyImportData::ImportAudioAssets(const FString& BaseContentDir)
 	// Metadata helpers
 	auto GetMetaValue = [](UPackage* Package, UObject* Object, const TCHAR* Key) -> FString
 		{
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
+			if (!Package) return FString();
+			UMetaData* MetaData = Package->GetMetaData();
+			return MetaData ? MetaData->GetValue(Object, Key) : FString();
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
 			if (!Package) return FString();
 			return Package->GetMetaData().GetValue(Object, Key);
 #else
@@ -947,7 +951,14 @@ void UArticyImportData::ImportAudioAssets(const FString& BaseContentDir)
 
 	auto SetMetaValue = [](UPackage* Package, UObject* Object, const TCHAR* Key, const FString& Value)
 		{
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
+			if (!Package) return;
+			UMetaData* MetaData = Package->GetMetaData();
+			if (MetaData)
+			{
+				MetaData->SetValue(Object, Key, *Value);
+			}
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
 			if (!Package) return;
 			Package->GetMetaData().SetValue(Object, Key, *Value);
 #else

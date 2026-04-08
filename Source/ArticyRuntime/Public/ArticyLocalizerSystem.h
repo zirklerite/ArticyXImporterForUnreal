@@ -58,7 +58,7 @@ public:
 		}
 
 		// Find the table
-		FStringTableConstPtr TablePtr = FStringTableRegistry::Get().FindStringTable(FName(TableName.GetValue()));
+		FStringTableConstPtr TablePtr = FStringTableRegistry::Get().FindStringTable(FName(*TableName));
 		if (TablePtr.IsValid())
 		{
 			// Find the entry
