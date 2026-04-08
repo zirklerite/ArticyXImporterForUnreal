@@ -24,7 +24,9 @@
 #include "Misc/FileHelper.h"
 #include "Factories/SoundFactory.h"
 #include "UObject/SavePackage.h"
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 6)
 #include "UObject/MetaData.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "ArticyImportData"
 
@@ -935,7 +937,10 @@ void UArticyImportData::ImportAudioAssets(const FString& BaseContentDir)
 	// Metadata helpers
 	auto GetMetaValue = [](UPackage* Package, UObject* Object, const TCHAR* Key) -> FString
 		{
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 6)
+			// UMetaData was removed in UE 5.6; always reimport
+			return FString();
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5
 			if (!Package) return FString();
 			UMetaData* MetaData = Package->GetMetaData();
 			return MetaData ? MetaData->GetValue(Object, Key) : FString();
@@ -951,7 +956,9 @@ void UArticyImportData::ImportAudioAssets(const FString& BaseContentDir)
 
 	auto SetMetaValue = [](UPackage* Package, UObject* Object, const TCHAR* Key, const FString& Value)
 		{
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 6)
+			// UMetaData was removed in UE 5.6; no-op
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5
 			if (!Package) return;
 			UMetaData* MetaData = Package->GetMetaData();
 			if (MetaData)
